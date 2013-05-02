@@ -98,6 +98,7 @@ class BuildsController < ApplicationController
   def project_build
     @project = Project.where(:name => params[:project_id]).first
     if !@project
+      remote = Remote.find_or_create_by_url(params[:repo_url])
       repository = Repository.find_or_create_by_url(params[:repo_url])
       @project = repository.projects.create!(:name => params[:project_id])
     end
