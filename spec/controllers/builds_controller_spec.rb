@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe BuildsController do
+  include ControllerHelper
+
   describe "#create" do
     let(:repo) { FactoryGirl.create(:repository) }
     before do
@@ -319,6 +321,30 @@ RESPONSE
         elements = doc.css("input[name=auto_merge]")
         elements.size.should == 1
         elements.first['disabled'].should be_present
+      end
+    end
+  end
+
+  describe "the api" do
+    let(:project) { FactoryGirl.create(:project) }
+    let(:build) { FactoryGirl.create(:build, :project => project) }
+
+    context "for the show action" do
+      it "returns a list of build_parts" do
+        (1..4).map { FactoryGirl.create(:build_part, :build_instance => build) }
+        get :show, :format => :json, :id => build.id, :project_id => project.name
+        response.should be_success
+        json_response['build']['build_parts'].should be_an(Array)
+      end
+
+      it "each build_part has a build_part_attempt" do
+        build_part = FactoryGirl.create(:build_part, :build_instance => build)
+        build_attempt = FactoryGirl.create(:build_attempt, :build_part => build_part)
+        get :show, :format => :json, :id => build.id, :project_id => project.name
+        response.should be_success
+        json_response['build']['build_parts'].first.should include('last_build_attempt')
+        json_response['build']['build_parts'].first['last_build_attempt'].
+          should include('id', 'started_at', 'finished_at', 'state')
       end
     end
   end

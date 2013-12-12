@@ -3,7 +3,10 @@ class BuildPartsController < ApplicationController
 
   def show
     respond_to do |format|
-      format.json { render :json => @build_part.as_json.merge!(:last_build_attempt => last_attempt.as_json) }
+      format.json do
+        ActiveRecord::Base.include_root_in_json = false
+        render :json => { :build_part => @build_part.as_json.merge!(:last_build_attempt => last_attempt.as_json) }
+      end
       format.html {}
     end
   end
