@@ -11,8 +11,9 @@ class BuildsController < ApplicationController
       format.json do
         ActiveRecord::Base.include_root_in_json = false
         build_parts = @build.build_parts.map do |p|
-          p.as_json.merge!( :last_build_attempt => p.last_attempt.
-                            as_json(:only => [ :id, :started_at, :finished_at, :state ]))
+          p.as_json(:only => [:id, :paths, :kind, :retry_count, :options]).
+            merge!( :last_build_attempt => p.last_attempt.
+                    as_json(:only => [ :id, :started_at, :finished_at, :state ]))
         end
         render :json => { :build => @build.as_json.merge!(:build_parts => build_parts) }
       end
