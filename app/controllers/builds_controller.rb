@@ -8,6 +8,14 @@ class BuildsController < ApplicationController
     @build = @project.builds.includes(build_parts: :build_attempts).find(params[:id])
 
     respond_to do |format|
+      format.json do
+        ActiveRecord::Base.include_root_in_json = false
+        build_parts = @build.build_parts.map do |p|
+          p.as_json.merge!( :last_build_attempt => p.last_attempt.
+                            as_json(:only => [ :id, :started_at, :finished_at, :state ]))
+        end
+        render :json => { :build => @build.as_json.merge!(:build_parts => build_parts) }
+      end
       format.html
       format.png do
         # See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21
