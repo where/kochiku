@@ -19,12 +19,14 @@ class BuildsController < ApplicationController
   end
 
   def create
+    puts params.inspect
     build = make_build
 
     if build && build.save
+      puts "Build && build.save"
       head :ok, :location => project_build_url(build.project, build)
     else
-      head :ok
+      render :json => @build
     end
   end
 
